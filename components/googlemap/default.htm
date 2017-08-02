@@ -1,0 +1,28 @@
+<!-- Map -->
+<div id="{{__SELF__.id}}" class="google-map" style="height: {{__SELF__.property('height')}}; width: {{__SELF__.property('width')}};"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key={{ google_maps_key }}"></script>
+<script>
+// This example adds a marker to indicate the position
+// of Bondi Beach in Sydney, Australia
+function initialize() {
+    var center = new google.maps.LatLng({{ latitude }}, {{ longitude }});
+    
+    var mapOptions = {
+      zoom: {{__SELF__.property('zoom')}},
+      center: center,
+      mapTypeId: google.maps.MapTypeId.{{__SELF__.property('mapTypeId')}}
+    }
+    var map = new google.maps.Map(document.getElementById('{{__SELF__.id}}'),
+                                    mapOptions);
+
+    {% if (__SELF__.property('showMarker')) %}
+        var beachMarker = new google.maps.Marker({
+            position: center,
+            map: map
+        });
+    {% endif %}
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>

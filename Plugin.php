@@ -67,10 +67,8 @@ class Plugin extends PluginBase
      */
     public function registerComponents()
     {
-        return []; // Remove this line to activate
-
         return [
-            'Inerba\Geolacatio\Components\MyComponent' => 'myComponent',
+            'Inerba\Geolocation\Components\GoogleMap' => 'GoogleMap',
         ];
     }
 
@@ -98,6 +96,7 @@ class Plugin extends PluginBase
     {
         return [
             'functions' => [
+                'geo_map'       => [Geo::class, 'geo_map'],
                 'geo_reverse'   => [Geo::class, 'geo_reverse'],
                 'geo_geocode'   => [Geo::class, 'geo_geocode'],
                 'geo_distance'  => [Geo::class, 'geo_distance'],
