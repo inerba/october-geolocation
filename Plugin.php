@@ -2,6 +2,7 @@
 
 use Backend;
 use System\Classes\PluginBase;
+use Inerba\Geolocation\Classes\Geolocation as Geo;
 
 /**
  * Geolacatio Plugin Information File
@@ -90,6 +91,18 @@ class Plugin extends PluginBase
     {
         return [
             'Inerba\Geolocation\FormWidgets\Geocode' => 'geocode'
+        ];
+    }
+
+    public function registerMarkupTags()
+    {
+        return [
+            'functions' => [
+                'geo_reverse'   => [Geo::class, 'geo_reverse'],
+                'geo_geocode'   => [Geo::class, 'geo_geocode'],
+                'geo_distance'  => [Geo::class, 'geo_distance'],
+                'geo_reverse_distance'  => [Geo::class, 'geo_reverse_distance'],
+            ]
         ];
     }
 }
