@@ -64,7 +64,9 @@ class Plugin extends PluginBase
     public function boot()
     {
         PostModel::extend(function($model){
-            $model->jsonable(array_merge($model->getJsonable(), ["geo_components"]));
+            $model->implement[] = 'Inerba.Geolocation.Behaviors.Geographical';
+            //$model->jsonable(array_merge($model->getJsonable(), ["geo_components"]));
+            $model->addJsonable(["geo_components"]);
         });
 
         Event::listen('backend.form.extendFields', function ($widget) {
