@@ -1,8 +1,12 @@
 <?php namespace Inerba\Geolocation;
 
 use Backend;
+use Event;
 use System\Classes\PluginBase;
+use System\Classes\PluginManager;
 use Inerba\Geolocation\Classes\Geolocation as Geo;
+use RainLab\Blog\Models\Post as PostModel;
+
 
 /**
  * Geolacatio Plugin Information File
@@ -24,6 +28,8 @@ class Plugin extends PluginBase
             'homepage'    => 'https://github.com/inerba/october-geolocation'
         ];
     }
+
+    public $require = ['RainLab.Blog','RainLab.Pages'];
 
     public function registerSettings()
     {
@@ -57,7 +63,70 @@ class Plugin extends PluginBase
      */
     public function boot()
     {
+        PostModel::extend(function($model){
+            $model->jsonable(array_merge($model->getJsonable(), ["geo_components"]));
+        });
 
+        Event::listen('backend.form.extendFields', function ($widget) {
+            if( PluginManager::instance()->hasPlugin('RainLab.Blog') && $widget->model instanceof \RainLab\Blog\Models\Post)
+            {
+
+                $widget->addFields([
+                    'geo_components[address]' => [
+                        'label'   => 'Address',
+                        'type'    => 'geocode',
+                        'fieldMap' => [
+                            'latitude' => 'geo_lat',
+                            'longitude' => 'geo_lng',
+                            'city' => 'geo_components[city]',
+                            'province' => 'geo_components[province]',
+                            'country' => 'geo_components[country]',
+                            'zip' => 'geo_components[zip]'
+                        ],
+                        'tab'     => 'Geolocation',
+                        'span'    => 'full',
+                    ],
+                    'geo_lat' => [
+                        'label'   => 'Latitude',
+                        'type'    => 'text',
+                        'span'    => 'left',
+                        'tab'     => 'Geolocation',
+                    ],
+                    'geo_lng' => [
+                        'label'   => 'Longitude',
+                        'type'    => 'text',
+                        'span'    => 'right',
+                        'tab'     => 'Geolocation',
+                    ],
+                    'geo_components[city]' => [
+                        'label'   => 'City',
+                        'type'    => 'text',
+                        'span'    => 'left',
+                        'tab'     => 'Geolocation',
+                    ],
+                    'geo_components[province]' => [
+                        'label'   => 'City',
+                        'type'    => 'text',
+                        'span'    => 'right',
+                        'tab'     => 'Geolocation',
+                    ],
+                    'geo_components[country]' => [
+                        'label'   => 'City',
+                        'type'    => 'text',
+                        'span'    => 'left',
+                        'tab'     => 'Geolocation',
+                    ],
+                    'geo_components[zip]' => [
+                        'label'   => 'City',
+                        'type'    => 'text',
+                        'span'    => 'right',
+                        'tab'     => 'Geolocation',
+                    ],
+                    
+                ],
+                'secondary');
+            }
+        });
     }
 
     /**

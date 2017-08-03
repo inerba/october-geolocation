@@ -1,1 +1,4 @@
-1.0.1: First version of Geolocation
+1.0.1: 'First version of Geolocation'
+1.0.2:
+    - create_blog_posts_table.php
+    - create_geo_blog_posts_table.php

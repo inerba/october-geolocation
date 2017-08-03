@@ -11,43 +11,6 @@ class Geolocation
 	private static $apiurl = 'https://maps.googleapis.com/maps/api/geocode/json';
 	private static $directionsurl = 'https://maps.googleapis.com/maps/api/directions/json';
 
-	public static function geo_map($map_address,$height='400px',$width='100%',$zoom=15,$mapType="ROADMAP", $marker=true)
-	{
-		$id = str_slug($map_address);
-
-		$params = [
-			'sensor' => 'false',
-			'address' => $map_address
-		];
-
-		$settings = Setting::instance();
-
-		$map_data = self::get_maps_json($params);
-
-		$lat_lng = $map_data->coordinates->lat.",".$map_data->coordinates->lng;
-
-		$html = '<div id="map-'.$id.'" class="google-map" style="height: '.$height.'; width: '.$width.';"></div>';
-		$html .= "
-				<script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp&key=".$settings->google_maps_key."\"></script>
-				<script>
-				function initMap() {
-					var center = new google.maps.LatLng(".$map_data->coordinates->lat.", ".$map_data->coordinates->lng.");
-	    
-				    var mapOptions = {
-				      zoom: ".$zoom.",
-				      center: center,
-				      mapTypeId: google.maps.MapTypeId.".$mapType."
-				    }
-				    var map = new google.maps.Map(document.getElementById('map-".$id."'), mapOptions);
-				";
-
-		if($marker) $html .= "var beachMarker = new google.maps.Marker({ position: center, map: map });";
-
-		$html .= "} google.maps.event.addDomListener(window, 'load', initMap); </script>";
-
-		return $html;
-	}
-
 	public static function geo_geocode($map_address)
 	{
 
@@ -80,10 +43,11 @@ class Geolocation
 		return self::get_directions($params, $cache_duration);
 	}
 
-	public static function geo_distance($loc1, $loc2, $cache_duration = 10080)
+	public static function geo_distance($loc1, $loc2, $cache_duration = 10080, $mode="driving")
 	{
 		$params = [
 			'units' => 'metric',
+			'mode' => $mode,
 			'origin' => $loc1,
 			'destination' => $loc2
 		];
@@ -91,11 +55,49 @@ class Geolocation
 		return self::get_directions($params, $cache_duration);
 	}
 
+	public static function geo_map($map_address,$height='400px',$width='100%',$zoom=15,$mapType="ROADMAP", $marker=true)
+	{
+		$id = str_slug($map_address);
+
+		$params = [
+			'sensor' => 'false',
+			'address' => $map_address
+		];
+
+		$settings = Setting::instance();
+
+		$map_data = self::get_maps_json($params);
+
+		$lat_lng = $map_data->coordinates->lat.",".$map_data->coordinates->lng;
+
+		$html = '<div id="map-'.$id.'" class="google-map" style="height: '.$height.'; width: '.$width.';"></div>';
+		$html .= "
+				<script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp&key=".$settings->google_maps_key."\"></script>
+				<script>
+				function initMap() {
+					var center = new google.maps.LatLng(".$map_data->coordinates->lat.", ".$map_data->coordinates->lng.");
+	    
+				    var mapOptions = {
+				      zoom: ".$zoom.",
+				      center: center,
+				      mapTypeId: google.maps.MapTypeId.".$mapType."
+				    }
+				    var map = new google.maps.Map(document.getElementById('map-".$id."'), mapOptions);
+				";
+
+		if($marker) $html .= "var marker = new google.maps.Marker({ position: center, map: map });";
+
+		$html .= "} google.maps.event.addDomListener(window, 'load', initMap); </script>";
+
+		return $html;
+	}
+
 	private static function get_directions($params, $cache_duration = 10080)
 	{
 		$settings = Setting::instance();
 
 		$url = self::$directionsurl . "?" . http_build_query(array_merge($params,['key'=>$settings->google_maps_key]));
+
 
 		$direction = Cache::remember(md5($url), $cache_duration, function() use($url) {
 
