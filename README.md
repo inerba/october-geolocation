@@ -176,5 +176,15 @@ esempio: `{{ geo_reverse_distance([41.7252936, 13.3412036],[41.6431139, 13.34717
 
 crea la mappa a partire dall'indirizzo, è possibile specificare il fattore di zoom, il tipo di mappa: ROADMAP, SATELLITE, HYBRID e TERRAIN le dimensioni e la visibilità del marker.
 
+## Uso dei metodi statici
+
+Puoi usare tutti i filtri come metodi statici, basta che includi la classe e non usi il prefisso *geo_*
+
+```php
+use Inerba\Geolocation\Classes\Geolocation as Geo;
+
+echo Geo::geocode('Alatri'); // return '41.7252936, 13.3412036'
+
+```
 
 
