@@ -1,6 +1,7 @@
 <?php namespace Inerba\Geolocation\Components;
 
 use Cms\Classes\ComponentBase;
+use RainLab\Blog\Models\Post as PostModel;
 use Response;
 
 class MarkerCluster extends ComponentBase
@@ -50,7 +51,27 @@ class MarkerCluster extends ComponentBase
 
     public function onRun()
     {
-        
+        $latitude = 31.030117;
+        $longitude = 2.796551;
+        $inner_radius = 0;
+        $outer_radius = 1000;
+
+        $posts = PostModel::geofence($latitude, $longitude, $inner_radius, $outer_radius)->get();
+
+        foreach ($posts as $item) {
+
+            if(!is_null($item->geo_lat) || !is_null($item->geo_lng))          
+                $markers[] = [
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'latitude' => $item->geo_lat,
+                    'longitude' => $item->geo_lng,
+                ];
+        }
+
+        dd($markers);
+
+        /*
         $p = $this->getProperties();
 
         $cd = $this->page->{$p['component_data']};
@@ -66,6 +87,7 @@ class MarkerCluster extends ComponentBase
                     'longitude' => $item->{$p['marker_lng']},
                 ];
         }
+        */
         
         return Response::json($markers);
     }
