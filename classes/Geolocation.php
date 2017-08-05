@@ -11,7 +11,7 @@ class Geolocation
 	private static $apiurl = 'https://maps.googleapis.com/maps/api/geocode/json';
 	private static $directionsurl = 'https://maps.googleapis.com/maps/api/directions/json';
 
-	public static function geo_geocode($map_address)
+	public static function geocode($map_address, $all_components=false, $cache_duration = 10080)
 	{
 
 		$params = [
@@ -19,43 +19,54 @@ class Geolocation
 			'address' => $map_address
 		];
 
-		return self::get_maps_json($params);
+		return self::get_maps_json($params, $all_components, $cache_duration);
 	}
 
-	public static function geo_reverse($lat, $lng)
+	public static function reverse($lat, $lng, $all_components = false, $cache_duration = 10080)
 	{
 		$params = [
 			'sensor' => 'false',
 			'latlng' => $lat.','.$lng
 		];
 
-		return self::get_maps_json($params);
+		$mjson = self::get_maps_json($params, true, $cache_duration);
+
+		if(!$all_components)
+			return $mjson->address;
+
+		return $mjson;
 	}
 
-	public static function geo_reverse_distance($lat, $lng, $lat2, $lng2, $cache_duration = 10080)
-	{
-		$params = [
-			'units' => 'metric',
-			'origin' => $lat.','.$lng,
-			'destination' => $lat2.','.$lng2
-		];
-
-		return self::get_directions($params, $cache_duration);
-	}
-
-	public static function geo_distance($loc1, $loc2, $cache_duration = 10080, $mode="driving")
+	/*
+	 * @mode = 	'driving' (default) indicates distance calculation using the road network.
+	 *			'walking' requests distance calculation for walking via pedestrian paths & sidewalks (where available).
+	 *			'bicycling' requests distance calculation for bicycling via bicycle paths & preferred streets (where available).
+	 */
+	public static function distance($origin, $destination, $mode="driving", $cache_duration = 10080)
 	{
 		$params = [
 			'units' => 'metric',
 			'mode' => $mode,
-			'origin' => $loc1,
-			'destination' => $loc2
+			'origin' => $origin,
+			'destination' => $destination
 		];
 
 		return self::get_directions($params, $cache_duration);
 	}
 
-	public static function geo_map($map_address,$height='400px',$width='100%',$zoom=15,$mapType="ROADMAP", $marker=true)
+	public static function reverse_distance($origin_latlng, $destination_latlng, $mode="driving", $cache_duration = 10080)
+	{
+		$params = [
+			'units' => 'metric',
+			'mode' => $mode,
+			'origin' => implode(',', $origin_latlng),
+			'destination' => implode(',', $destination_latlng)
+		];
+
+		return self::get_directions($params, $cache_duration);
+	}
+
+	public static function map($map_address,$height='400px',$width='100%',$zoom=15,$mapType="ROADMAP", $marker=true)
 	{
 		$id = str_slug($map_address);
 
@@ -66,7 +77,7 @@ class Geolocation
 
 		$settings = Setting::instance();
 
-		$map_data = self::get_maps_json($params);
+		$map_data = self::get_maps_json($params,true);
 
 		$lat_lng = $map_data->coordinates->lat.",".$map_data->coordinates->lng;
 
@@ -132,52 +143,60 @@ class Geolocation
 		return $direction;
 	}
 
-	private static function get_maps_json($params)
+	private static function get_maps_json($params, $all=false, $cache_duration= 10080, $is_reverse= false)
 	{
 		$settings = Setting::instance();
 
+		$allname = $all ? '-cmp' : '';
+
 		$url = self::$apiurl . "?" . http_build_query(array_merge($params,['key'=>$settings->google_maps_key]));
 
-		$data = file_get_contents($url);
+		$mjson = Cache::remember(md5($url).$allname, $cache_duration, function() use($url,$all) {
 
-		// parse the json response
-		$jsondata = get_object_vars(json_decode($data))['results'][0];
+			$data = file_get_contents($url);
 
-		$address = [];
-		foreach ($jsondata->address_components as $ac) {
+			// parse the json response
+			$jsondata = get_object_vars(json_decode($data))['results'][0];
 
-			switch ($ac->types[0]) {
-				case 'administrative_area_level_3':
-					$type = 'city';
-					break;
+			if($all){
 
-				case 'administrative_area_level_2':
-					$type = 'province';
-					break;
+				$address = [];
+				foreach ($jsondata->address_components as $ac) {
 
-				case 'administrative_area_level_1':
-					$type = 'region';
-					break;
-				
-				default:
-					$type = $ac->types[0];
-					break;
+					switch ($ac->types[0]) {
+						case 'administrative_area_level_3':
+							$type = 'city';
+							break;
+
+						case 'administrative_area_level_2':
+							$type = 'province';
+							break;
+
+						case 'administrative_area_level_1':
+							$type = 'region';
+							break;
+						
+						default:
+							$type = $ac->types[0];
+							break;
+					}
+
+					$address[$type] = (object) [
+						'long' => $ac->long_name,
+						'short' => $ac->short_name,
+					]; 
+				}
+
+				return (object) [
+					'address' => $jsondata->formatted_address,
+					'coordinates' => (object) $jsondata->geometry->location,
+					'components' => (object) $address,
+				];
+			} else {
+				return $jsondata->geometry->location->lat.', '.$jsondata->geometry->location->lng;
 			}
-
-			$address[$type] = (object) [
-				'long' => $ac->long_name,
-				'short' => $ac->short_name,
-			]; 
-		}
-
-		$coordinates = $jsondata->geometry->location;
-
-		$return = (object) [
-			'address' => $jsondata->formatted_address,
-			'coordinates' => (object) $jsondata->geometry->location,
-			'components' => (object) $address,
-		];
-		return $return;
+		});
+		return $mjson;
 	}
 
 	public static function formatDistance($meters) {
