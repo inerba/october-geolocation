@@ -2,9 +2,32 @@ GEOLOCATION
 ===================
 
 
-Geolocation è un plugin per october cms che permette di effettuare diverse operazioni su indirizzi e coordinate, include un behavior per calcolare la distanza degli elementi nel database e aggiunge dei campi di geolocalizzazione a RainLab Blog
+Geolocation è un plugin per october cms che permette di effettuare diverse operazioni su indirizzi e coordinate, include un behavior per calcolare la distanza derivato da:[Laravel Geographical](https://github.com/malhal/Laravel-Geographical). Inoltre aggiunge dei campi di geolocalizzazione a RainLab Blog
 
 --------------------
+
+Behaivoir
+-------------
+Campi aggiunti a *RainLab.Blog*:
+```
+float geo_lat     // latitudine
+float geo_lng     // longitudine
+text geo_components //contiene il json dei componenti
+```
+
+### 1. Distance
+Trova la distanza degli elementi del database da una posizione specifica.
+
+$query = Model::distance($latitude, $longitude);
+$asc = $query->orderBy('distance', 'ASC')->get();
+
+### 2. Geofence
+Trova gli elementi del database all'interno di un cerchio.
+
+$query = Model::geofence($latitude, $longitude, $inner_radius, $outer_radius);
+$all = $query->get();
+
+
 
 
 Installazione
@@ -13,7 +36,7 @@ Installazione
 Questo plugin è ancora in fase sperimantale, pertanto non è ancora possibile installarlo tramite il normale processo di installazione di October CMS.
 
  - per installare il pacchetto, vai nella cartella `plugins` dell'installazione di october e clona questo repository nella cartella `inerba/geolocation`.
-	 `git clone https://github.com/inerba/october-geolocation.git inerba/geolocation`
+   `git clone https://github.com/inerba/october-geolocation.git inerba/geolocation`
 
  - vai nella cartella appena creata: `inerba/geolocation` e installa tutte le dipendenze con `composer install`
 
