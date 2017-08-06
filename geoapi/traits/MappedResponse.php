@@ -4,20 +4,18 @@ use Response;
 
 trait MappedResponse {
 
-    private function get_json($model)
+    private function get_json($model,$mapping=[])
     {
-        $markers = $model->map(function ($item) {
+        $markers = [];
+        $num = 0;
+        foreach ($model as $itemkey => $item) {
 
-            return [
-                'id' => $item->id,
-                'title' => $item->title,
-                'description' => $item->description,
-                'latitude' => $item->geo_lat,
-                'longitude' => $item->geo_lng
-            ];
+            foreach ($mapping as $k => $v) {
+                $markers[$num][$k] = $item->$v;
+            }
 
-        });
-
+            $num++;
+        }
         return Response::json($markers);
     }
     
