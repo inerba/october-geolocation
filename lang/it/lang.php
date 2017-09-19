@@ -68,13 +68,13 @@ return [
         'pinned' => 'Pinned',
     ],
     'blog' => [
-        'geolocation' => 'Geolocation',
-        'address' => 'Address',
-        'latitude' => 'Latitude',
-        'longitude' => 'Longitude',
-        'city' => 'City',
-        'province' => 'Province',
-        'country' => 'Country',
-        'zip' => 'Zip',
+        'geolocation' => 'Territorio',
+        'address' => 'Indirizzo',
+        'latitude' => 'Latitudine',
+        'longitude' => 'Longitudine',
+        'city' => 'Città',
+        'province' => 'Provincia',
+        'country' => 'Codice Paese',
+        'zip' => 'Cap',
     ]
 ];

@@ -2,6 +2,3 @@
 1.0.2:
     - create_blog_posts_table.php
     - create_geo_blog_posts_table.php
-1.0.3:
-    - 'seed dummy blog data'
-    - seeder103.php

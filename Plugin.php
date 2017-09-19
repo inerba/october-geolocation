@@ -67,6 +67,16 @@ class Plugin extends PluginBase
             $model->implement[] = 'Inerba.Geolocation.Behaviors.Geographical';
             //$model->jsonable(array_merge($model->getJsonable(), ["geo_components"]));
             $model->addJsonable(["geo_components"]);
+
+            $model->bindEvent('model.beforeSave', function() use ($model) {
+
+                $input = input('Post');
+                
+                if(empty($model->geo_lat) || empty($model->geo_lng)){
+                    $model->geo_lat = null;
+                    $model->geo_lng = null;
+                }
+            });
         });
 
         Event::listen('backend.form.extendFields', function ($widget) {
@@ -75,7 +85,7 @@ class Plugin extends PluginBase
 
                 $widget->addFields([
                     'geo_components[address]' => [
-                        'label'   => 'Address',
+                        'label'   => 'inerba.geolocation::lang.blog.address',
                         'type'    => 'geocode',
                         'fieldMap' => [
                             'latitude' => 'geo_lat',
@@ -85,44 +95,44 @@ class Plugin extends PluginBase
                             'country' => 'geo_components[country]',
                             'zip' => 'geo_components[zip]'
                         ],
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                         'span'    => 'full',
                     ],
                     'geo_lat' => [
-                        'label'   => 'Latitude',
+                        'label'   => 'inerba.geolocation::lang.blog.latitude',
                         'type'    => 'text',
                         'span'    => 'left',
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                     ],
                     'geo_lng' => [
-                        'label'   => 'Longitude',
+                        'label'   => 'inerba.geolocation::lang.blog.longitude',
                         'type'    => 'text',
                         'span'    => 'right',
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                     ],
                     'geo_components[city]' => [
-                        'label'   => 'City',
+                        'label'   => 'inerba.geolocation::lang.blog.city',
                         'type'    => 'text',
                         'span'    => 'left',
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                     ],
                     'geo_components[province]' => [
-                        'label'   => 'City',
+                        'label'   => 'inerba.geolocation::lang.blog.province',
                         'type'    => 'text',
                         'span'    => 'right',
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                     ],
                     'geo_components[country]' => [
-                        'label'   => 'City',
+                        'label'   => 'inerba.geolocation::lang.blog.country',
                         'type'    => 'text',
                         'span'    => 'left',
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                     ],
                     'geo_components[zip]' => [
-                        'label'   => 'City',
+                        'label'   => 'inerba.geolocation::lang.blog.zip',
                         'type'    => 'text',
                         'span'    => 'right',
-                        'tab'     => 'Geolocation',
+                        'tab'     => 'inerba.geolocation::lang.blog.geolocation',
                     ],
                     
                 ],
